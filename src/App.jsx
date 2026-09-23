@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
+import LandingPage from "../src/pages/LandingPage/LandingPage.jsx";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -28,7 +29,9 @@ function App() {
         />
 
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* ================= PUBLIC ROUTES ================= */}
+
+          <Route path="/" element={<LandingPage />} />
 
           <Route path="/login" element={<Login />} />
 
@@ -37,6 +40,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route path="/terms" element={<Terms />} />
+
+          {/* ================= PROTECTED ROUTES ================= */}
 
           <Route
             path="/dashboard"

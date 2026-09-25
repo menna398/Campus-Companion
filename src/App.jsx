@@ -22,7 +22,13 @@ import PublicRoute from "./routes/PublicRoute";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 
+import CourseDetails from "../src/pages/courses/CourseDetails.jsx";
+
 import { AuthProvider } from "./context/AuthContext";
+import CourseOverview from "./components/courses/CourseOverview.jsx";
+import CourseAssignments from "./components/courses/CourseAssignments.jsx";
+import CourseGrades from "./components/courses/CourseGrades.jsx";
+import CourseResources from "./components/courses/CourseResources.jsx";
 
 function App() {
   return (
@@ -105,6 +111,30 @@ function App() {
 
             {/* Courses */}
             <Route path="/courses" element={<Courses />} />
+
+            {/* Course Details */}
+            <Route
+              path="/courses/:id"
+              element={<CourseDetails></CourseDetails>}
+            >
+              {/* /courses/1 */}
+              <Route index element={<CourseOverview></CourseOverview>} />
+
+              {/* /courses/1/assignments */}
+              <Route
+                path="assignments"
+                element={<CourseAssignments></CourseAssignments>}
+              />
+
+              {/* /courses/1/grades */}
+              <Route path="grades" element={<CourseGrades></CourseGrades>} />
+
+              {/* /courses/1/resources */}
+              <Route
+                path="resources"
+                element={<CourseResources></CourseResources>}
+              />
+            </Route>
 
             {/* Assignments */}
             <Route path="/assignments" element={<Assignments />} />

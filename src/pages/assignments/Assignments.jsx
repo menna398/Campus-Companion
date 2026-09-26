@@ -79,27 +79,29 @@ export default function Assignments() {
   );
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] px-8 py-8">
+    <div className="min-h-screen w-full bg-[#faf9f7] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       {/* ================= HEADER ================= */}
-      <div className="mb-7 flex items-start justify-between gap-6">
+      <div className="mb-6 flex flex-col gap-5 lg:mb-7 lg:flex-row lg:items-start lg:justify-between">
+        {/* Title */}
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#263548]">
+          <h1 className="font-serif text-2xl font-semibold text-[#263548] sm:text-3xl">
             Assignments
           </h1>
 
-          <p className="mt-1 text-sm text-[#64748b]">
+          <p className="mt-1 max-w-xl text-xs leading-5 text-[#64748b] sm:text-sm">
             Weekly task planner & curriculum requirements progress
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Actions */}
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           {/* FILTERS */}
-          <div className="flex rounded-lg border border-[#e5e1dc] bg-white p-1">
+          <div className="grid w-full grid-cols-3 rounded-lg border border-[#e5e1dc] bg-white p-1 sm:flex sm:w-auto">
             {["upcoming", "completed", "all"].map((item) => (
               <button
                 key={item}
                 onClick={() => setFilter(item)}
-                className={`rounded-md px-5 py-2 text-xs font-medium transition-all duration-200 ${
+                className={`rounded-md px-2 py-2 text-[10px] font-medium transition-all duration-200 sm:px-4 sm:text-xs ${
                   filter === item
                     ? "bg-[#7094b8] text-white shadow-sm"
                     : "text-[#475569] hover:bg-[#f5f3f0]"
@@ -117,7 +119,7 @@ export default function Assignments() {
           {/* NEW ASSIGNMENT */}
           <button
             type="button"
-            className="rounded-md bg-[#263548] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#33465c]"
+            className="w-full whitespace-nowrap rounded-md bg-[#263548] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#33465c] sm:w-auto"
           >
             + New Assignment
           </button>
@@ -125,27 +127,27 @@ export default function Assignments() {
       </div>
 
       {/* ================= MAIN CARD ================= */}
-      <div className="rounded-xl border border-[#e5e1dc] bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <div className="w-full overflow-hidden rounded-xl border border-[#e5e1dc] bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-4">
         {/* CARD HEADER */}
-        <div className="mb-3 px-3">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-[#8b9aaa]">
+        <div className="mb-3 px-2 sm:px-3">
+          <p className="text-[9px] font-medium uppercase tracking-wide text-[#8b9aaa] sm:text-[10px]">
             Academic Syllabus Alignment
           </p>
 
-          <h2 className="font-serif text-lg font-semibold text-[#263548]">
+          <h2 className="font-serif text-base font-semibold text-[#263548] sm:text-lg">
             Weekly Planner List
           </h2>
         </div>
 
         {/* =========================================
-            UPCOMING TASKS
-        ========================================= */}
+          UPCOMING TASKS
+      ========================================= */}
 
         {(filter === "upcoming" || filter === "all") && (
           <div>
             {filter === "all" && upcomingAssignments.length > 0 && (
-              <div className="mb-2 px-3 pt-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[#8b9aaa]">
+              <div className="mb-2 px-2 pt-2 sm:px-3">
+                <h3 className="text-[10px] font-semibold uppercase tracking-wide text-[#8b9aaa] sm:text-xs">
                   Upcoming Tasks
                 </h3>
               </div>
@@ -170,13 +172,13 @@ export default function Assignments() {
         )}
 
         {/* =========================================
-            COMPLETED TASKS
-        ========================================= */}
+          COMPLETED TASKS
+      ========================================= */}
 
         {(filter === "completed" || filter === "all") && (
-          <div className="mt-8">
-            <div className="mb-2 flex items-center gap-3 px-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[#8b9aaa]">
+          <div className="mt-6 sm:mt-8">
+            <div className="mb-2 flex items-center gap-3 px-2 sm:px-3">
+              <h3 className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-[#8b9aaa] sm:text-xs">
                 Completed Tasks
               </h3>
 

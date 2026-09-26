@@ -12,15 +12,15 @@ export default function Exams() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {/* Header */}
-        <div className="mb-7 flex items-start justify-between gap-4">
+        <div className="mb-6 flex flex-col gap-4 sm:mb-7 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-[#26364A]">
+            <h1 className="font-serif text-2xl font-semibold text-[#26364A] sm:text-3xl">
               Exams & Midterms
             </h1>
 
-            <p className="mt-1 text-xs text-[#697586]">
+            <p className="mt-1 max-w-xl text-[11px] leading-relaxed text-[#697586] sm:text-xs">
               Track midterms, final examinations, and quizzes across your
               semester
             </p>
@@ -30,7 +30,7 @@ export default function Exams() {
           <button
             type="button"
             onClick={handleAddExam}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-[#26364A] px-4 py-2.5 text-xs font-medium text-white transition hover:bg-[#1E2B3B]"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#26364A] px-4 py-2.5 text-xs font-medium text-white transition hover:bg-[#1E2B3B] sm:w-auto"
           >
             <span className="text-base leading-none">+</span>
             Add Exam
@@ -39,7 +39,7 @@ export default function Exams() {
 
         {/* Upcoming Exams */}
         <section>
-          <h2 className="mb-3 text-[11px] font-medium uppercase tracking-wide text-[#718096]">
+          <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wide text-[#718096] sm:text-[11px]">
             October 2026
           </h2>
 
@@ -55,8 +55,8 @@ export default function Exams() {
         </section>
 
         {/* Past Exams */}
-        <section className="mt-8">
-          <h2 className="mb-3 text-[11px] font-medium uppercase tracking-wide text-[#718096]">
+        <section className="mt-7 sm:mt-8">
+          <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wide text-[#718096] sm:text-[11px]">
             Past Exams (This Semester)
           </h2>
 

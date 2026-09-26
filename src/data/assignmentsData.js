@@ -1,0 +1,42 @@
+export const assignments = [
+  {
+    id: 1,
+    title: "Hashtable Collision Resolution Methods",
+    courseCode: "CS301",
+    status: "NOT STARTED",
+    dueDate: "(Due Oct 12)",
+    priority: "HIGH",
+  },
+  {
+    id: 2,
+    title: "Implement AVL Tree Rotations",
+    courseCode: "CS301",
+    status: "WORKING",
+    dueDate: "Due in 2 days (Oct 17)",
+    priority: "HIGH",
+  },
+  {
+    id: 3,
+    title: "Linear Independence & Basis Vector Space Problem Set 4",
+    courseCode: "MATH210",
+    status: "NOT STARTED",
+    dueDate: "Due in 5 days (Oct 20)",
+    priority: "MEDIUM",
+  },
+  {
+    id: 4,
+    title: "Milestone Project 1 Presentation Slides",
+    courseCode: "LIT150",
+    status: "WORKING",
+    dueDate: "Due in 1 week (Oct 22)",
+    priority: "LOW",
+  },
+  {
+    id: 5,
+    title: "Socrates Rhetoric Essay Draft",
+    courseCode: "LIT150",
+    status: "DONE",
+    dueDate: "Completed October 14",
+    priority: null,
+  },
+];

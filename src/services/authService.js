@@ -81,3 +81,43 @@ export const getCurrentUser = () => {
 export const logoutUser = () => {
   localStorage.removeItem(CURRENT_USER_KEY);
 };
+
+export function updateCurrentUser(updatedData) {
+  const currentUser = getCurrentUser();
+
+  if (!currentUser) {
+    throw new Error("No logged-in user found");
+  }
+
+  const updatedUser = {
+    ...currentUser,
+    ...updatedData,
+  };
+
+  localStorage.setItem(
+    "campus_companion_current_user",
+    JSON.stringify(updatedUser),
+  );
+
+  const storedUsers = localStorage.getItem("campus_companion_users");
+
+  if (storedUsers) {
+    const users = JSON.parse(storedUsers);
+
+    const updatedUsers = users.map((user) =>
+      user.id === updatedUser.id
+        ? {
+            ...user,
+            ...updatedUser,
+          }
+        : user,
+    );
+
+    localStorage.setItem(
+      "campus_companion_users",
+      JSON.stringify(updatedUsers),
+    );
+  }
+
+  return updatedUser;
+}

@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
+
 import {
   getCurrentUser,
   loginUser,
   logoutUser,
   registerUser,
+  updateCurrentUser,
 } from "../services/authService";
 
 const AuthContext = createContext();
@@ -40,6 +42,14 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   };
 
+  const updateUser = (updatedData) => {
+    const updatedUser = updateCurrentUser(updatedData);
+
+    setUser(updatedUser);
+
+    return updatedUser;
+  };
+
   const logout = () => {
     logoutUser();
     setUser(null);
@@ -51,6 +61,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     register,
+    updateUser,
     logout,
   };
 

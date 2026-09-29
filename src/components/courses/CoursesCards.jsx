@@ -62,7 +62,7 @@ export default function CoursesCards({ course }) {
           className="h-[5px] w-[5px] rounded-full"
           style={{ backgroundColor: course.color }}
         />
-        Next: {course.nextClass}
+        Next: {course.schedule}
       </p>
     </Link>
   );

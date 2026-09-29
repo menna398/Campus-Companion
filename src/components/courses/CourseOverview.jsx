@@ -34,11 +34,11 @@ export default function CourseOverview() {
           </div>
 
           <p className="mt-3 text-[11px] leading-5 text-[#596773]">
-            {course.description}
+            {course.description || "No description available for this course."}
           </p>
         </div>
 
-        {/* Objectives */}
+        {/* Course Progress */}
 
         <div className="rounded-xl border border-[#e7e3de] bg-white p-5">
           <span className="text-[8px] uppercase tracking-wide text-[#89949d]">
@@ -46,25 +46,28 @@ export default function CourseOverview() {
           </span>
 
           <h2 className="mt-1 font-serif text-base font-bold text-[#273545]">
-            Learning Objectives
+            Course Progress
           </h2>
 
-          <div className="mt-4 space-y-3">
-            {course.objectives.map((objective, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span
-                  className={
-                    objective.completed ? "text-[#91aa91]" : "text-[#9aa5ad]"
-                  }
-                >
-                  {objective.completed ? "✓" : "□"}
-                </span>
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[10px] text-[#596773]">
+                Syllabus Progress
+              </span>
 
-                <span className="text-[10px] text-[#4f5d68]">
-                  {objective.text}
-                </span>
-              </div>
-            ))}
+              <span className="text-[10px] font-semibold text-[#3d4a55]">
+                {course.progress}%
+              </span>
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-[#f1f0ed]">
+              <div
+                className="h-full rounded-full bg-[#91ae91]"
+                style={{
+                  width: `${course.progress}%`,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -72,61 +75,73 @@ export default function CourseOverview() {
       {/* RIGHT */}
 
       <div className="space-y-6">
-        {/* Grades */}
+        {/* Course Information */}
 
         <div className="rounded-xl border border-[#e7e3de] bg-white p-5">
           <span className="text-[8px] uppercase tracking-wide text-[#89949d]">
-            Evaluation
+            Course Information
           </span>
 
           <h2 className="mt-1 font-serif text-base font-bold text-[#273545]">
-            Grade Weight Breakdown
+            Details
           </h2>
 
-          <div className="mt-5 space-y-3">
-            {course.gradeBreakdown.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-sm"
-                    style={{
-                      backgroundColor: item.color,
-                    }}
-                  />
+          <div className="mt-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] text-[#89949d]">Professor</span>
 
-                  <span className="text-[9px] text-[#596773]">{item.name}</span>
-                </div>
+              <span className="text-[9px] font-semibold text-[#3d4a55]">
+                {course.professor}
+              </span>
+            </div>
 
-                <span className="text-[9px] font-semibold text-[#3d4a55]">
-                  {item.percentage}%
-                </span>
-              </div>
-            ))}
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] text-[#89949d]">Location</span>
+
+              <span className="text-[9px] font-semibold text-[#3d4a55]">
+                {course.location}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] text-[#89949d]">Credits</span>
+
+              <span className="text-[9px] font-semibold text-[#3d4a55]">
+                {course.credits}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[9px] text-[#89949d]">Schedule</span>
+
+              <p className="mt-1 text-[9px] font-semibold text-[#3d4a55]">
+                {course.schedule}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Milestones */}
+        {/* Course Progress Summary */}
 
         <div className="rounded-xl border border-[#e7e3de] bg-white p-5">
           <h2 className="font-serif text-base font-bold text-[#273545]">
-            Course Milestones
+            Progress Summary
           </h2>
 
-          <div className="mt-4 flex gap-3">
-            <span className="h-fit rounded bg-[#f5f5f2] px-2 py-1 text-[8px] text-[#687681]">
-              {course.milestone.date}
-            </span>
+          <div className="mt-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f1f5f1]">
+              <span className="text-[10px] font-semibold text-[#6f8c6f]">
+                {course.progress}%
+              </span>
+            </div>
 
             <div>
               <p className="text-[10px] font-semibold text-[#3d4a55]">
-                {course.milestone.title}
+                Current Progress
               </p>
 
               <p className="mt-1 text-[8px] text-[#89949d]">
-                {course.milestone.description}
+                Course syllabus completion
               </p>
             </div>
           </div>

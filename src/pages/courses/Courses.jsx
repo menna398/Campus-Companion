@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CoursesCards from "../../components/courses/CoursesCards";
-import { courses } from "../../data/coursesData";
+import useCourseStore from "../../store/courseStore";
 
 export default function Courses() {
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { courses, loading, error, fetchCourses } = useCourseStore();
+
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   const filteredCourses = courses.filter((course) => {
     const search = searchTerm.toLowerCase().trim();
@@ -32,6 +38,7 @@ export default function Courses() {
         </div>
 
         {/* Search */}
+
         <div className="relative w-full sm:w-[280px]">
           <svg
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b969f]"
@@ -76,7 +83,25 @@ export default function Courses() {
 
       {/* ================= COURSES ================= */}
 
-      {filteredCourses.length > 0 ? (
+      {loading ? (
+        <div className="rounded-xl border border-[#e7e3de] bg-white py-16 text-center">
+          <p className="font-serif text-lg text-[#273545]">
+            Loading courses...
+          </p>
+
+          <p className="mt-1 text-xs text-[#89949d]">
+            Please wait while your courses are being loaded.
+          </p>
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-[#e7e3de] bg-white py-16 text-center">
+          <p className="font-serif text-lg text-[#273545]">
+            Unable to load courses
+          </p>
+
+          <p className="mt-1 text-xs text-[#89949d]">{error}</p>
+        </div>
+      ) : filteredCourses.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredCourses.map((course) => (
             <CoursesCards key={course.id} course={course} />

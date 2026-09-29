@@ -1,11 +1,29 @@
 import { Link, Outlet, useParams } from "react-router-dom";
-import { courses } from "../../data/coursesData";
 import CourseTabs from "../../components/courses/CourseTabs";
+import useCourseStore from "../../store/courseStore";
 
 export default function CourseDetails() {
   const { id } = useParams();
 
-  const course = courses.find((course) => course.id === Number(id));
+  const { courses, loading } = useCourseStore();
+
+  const course = courses.find((course) => course.id === id);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
+        <div className="text-center">
+          <h2 className="font-serif text-2xl font-bold text-[#273545]">
+            Loading Course...
+          </h2>
+
+          <p className="mt-2 text-xs text-[#89949d]">
+            Please wait while the course is being loaded.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!course) {
     return (
@@ -52,11 +70,14 @@ export default function CourseDetails() {
           </div>
 
           <div className="flex items-center gap-3">
-            <img
-              src={course.professorImage}
-              alt=""
-              className="h-11 w-11 rounded-full object-cover"
-            />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef2f0] text-xs font-semibold text-[#687681]">
+              {course.professor
+                ?.split(" ")
+                .slice(0, 2)
+                .map((name) => name[0])
+                .join("")
+                .toUpperCase()}
+            </div>
 
             <div>
               <p className="text-xs font-semibold text-[#273545]">

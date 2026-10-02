@@ -11,27 +11,9 @@ export default function CourseOverview() {
         {/* Description */}
 
         <div className="rounded-xl border border-[#e7e3de] bg-white p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-base font-bold text-[#273545]">
-              Course Description
-            </h2>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="rounded-md px-3 py-1.5 text-[9px] text-[#596773] hover:bg-[#f4f3f0]"
-              >
-                Edit
-              </button>
-
-              <button
-                type="button"
-                className="rounded-md px-3 py-1.5 text-[9px] text-[#a06464] hover:bg-[#fff5f5]"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+          <h2 className="font-serif text-base font-bold text-[#273545]">
+            Course Description
+          </h2>
 
           <p className="mt-3 text-[11px] leading-5 text-[#596773]">
             {course.description || "No description available for this course."}

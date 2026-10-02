@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Link, Outlet, useParams } from "react-router-dom";
 import CourseTabs from "../../components/courses/CourseTabs";
+import CourseEditModal from "../../components/courses/CourseEditModal";
 import useCourseStore from "../../store/courseStore";
 
 export default function CourseDetails() {
   const { id } = useParams();
 
   const { courses, loading } = useCourseStore();
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const course = courses.find((course) => course.id === id);
 
@@ -69,25 +73,37 @@ export default function CourseDetails() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef2f0] text-xs font-semibold text-[#687681]">
-              {course.professor
-                ?.split(" ")
-                .slice(0, 2)
-                .map((name) => name[0])
-                .join("")
-                .toUpperCase()}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef2f0] text-xs font-semibold text-[#687681]">
+                {course.professor
+                  ?.split(" ")
+                  .slice(0, 2)
+                  .map((name) => name[0])
+                  .join("")
+                  .toUpperCase()}
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-[#273545]">
+                  {course.professor}
+                </p>
+
+                <p className="mt-1 text-[9px] text-[#89949d]">
+                  Office Hours: Tue/Thu 02:00 PM
+                </p>
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold text-[#273545]">
-                {course.professor}
-              </p>
+            {/* Edit Course */}
 
-              <p className="mt-1 text-[9px] text-[#89949d]">
-                Office Hours: Tue/Thu 02:00 PM
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsEditOpen(true)}
+              className="rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-4 py-2 text-[10px] font-semibold text-[#596773] transition hover:bg-[#f1efeb]"
+            >
+              Edit Course
+            </button>
           </div>
         </div>
       </div>
@@ -98,7 +114,20 @@ export default function CourseDetails() {
 
       {/* Current Tab */}
 
-      <Outlet context={{ course }} />
+      <Outlet
+        context={{
+          course,
+          openEditModal: () => setIsEditOpen(true),
+        }}
+      />
+
+      {/* Edit Course Modal */}
+
+      <CourseEditModal
+        course={course}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+      />
     </div>
   );
 }

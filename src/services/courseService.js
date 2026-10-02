@@ -14,3 +14,20 @@ export async function getCourses() {
 
   return response.data.data;
 }
+
+export async function updateCourse(courseId, courseData) {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.put(
+    `${API_URL}/courses/${courseId}`,
+    courseData,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return response.data.data;
+}

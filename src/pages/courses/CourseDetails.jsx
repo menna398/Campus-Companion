@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useParams } from "react-router-dom";
 import CourseTabs from "../../components/courses/CourseTabs";
 import CourseEditModal from "../../components/courses/CourseEditModal";
@@ -7,9 +7,15 @@ import useCourseStore from "../../store/courseStore";
 export default function CourseDetails() {
   const { id } = useParams();
 
-  const { courses, loading } = useCourseStore();
+  const { courses, loading, fetchCourses } = useCourseStore();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  useEffect(() => {
+    if (courses.length === 0) {
+      fetchCourses();
+    }
+  }, [courses.length, fetchCourses]);
 
   const course = courses.find((course) => course.id === id);
 
@@ -50,8 +56,6 @@ export default function CourseDetails() {
 
   return (
     <div className="min-h-screen bg-[#faf9f7] px-4 py-8 sm:px-6 lg:px-14">
-      {/* Header */}
-
       <div className="rounded-xl border border-[#e7e3de] bg-white p-5 sm:p-6">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
@@ -88,14 +92,8 @@ export default function CourseDetails() {
                 <p className="text-xs font-semibold text-[#273545]">
                   {course.professor}
                 </p>
-
-                <p className="mt-1 text-[9px] text-[#89949d]">
-                  Office Hours: Tue/Thu 02:00 PM
-                </p>
               </div>
             </div>
-
-            {/* Edit Course */}
 
             <button
               type="button"
@@ -108,11 +106,7 @@ export default function CourseDetails() {
         </div>
       </div>
 
-      {/* Tabs */}
-
       <CourseTabs courseId={course.id} />
-
-      {/* Current Tab */}
 
       <Outlet
         context={{
@@ -120,8 +114,6 @@ export default function CourseDetails() {
           openEditModal: () => setIsEditOpen(true),
         }}
       />
-
-      {/* Edit Course Modal */}
 
       <CourseEditModal
         course={course}

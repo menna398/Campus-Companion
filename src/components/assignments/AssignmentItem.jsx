@@ -3,10 +3,12 @@ export default function AssignmentItem({
   onPriorityChange,
   onStatusChange,
   onComplete,
+  onEdit,
+  onDelete,
 }) {
   const isDone = assignment.status === "DONE";
 
-  const isOverdue = assignment.dueDate.toLowerCase().includes("due oct");
+  const isOverdue = assignment.dueDate?.toLowerCase().includes("due oct");
 
   return (
     <div
@@ -14,12 +16,12 @@ export default function AssignmentItem({
         isDone ? "bg-[#fafafa]" : ""
       }`}
     >
-      {/* ================= TOP ROW ================= */}
       <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">
-        {/* COMPLETE CIRCLE */}
+        {/* COMPLETE */}
+
         <button
           type="button"
-          onClick={() => onComplete(assignment.id)}
+          onClick={() => onComplete(assignment)}
           title={isDone ? "Mark as not completed" : "Mark as completed"}
           className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200 hover:scale-110 sm:mt-0 ${
             isDone
@@ -32,7 +34,8 @@ export default function AssignmentItem({
           {isDone && <span className="text-[9px] font-bold text-white">✓</span>}
         </button>
 
-        {/* ASSIGNMENT CONTENT */}
+        {/* CONTENT */}
+
         <div className="min-w-0 flex-1">
           <h3
             className={`break-words text-xs font-medium leading-5 transition-all sm:text-sm ${
@@ -63,12 +66,14 @@ export default function AssignmentItem({
         </div>
 
         {/* DESKTOP ACTIONS */}
+
         <div className="hidden shrink-0 items-center gap-2 sm:flex">
           {/* PRIORITY */}
+
           {assignment.priority && (
             <button
               type="button"
-              onClick={() => onPriorityChange(assignment.id)}
+              onClick={() => onPriorityChange(assignment)}
               title="Click to change priority"
               className={`min-w-[58px] rounded-md px-2.5 py-1.5 text-[9px] font-semibold transition-all duration-200 hover:scale-105 ${
                 assignment.priority === "HIGH"
@@ -83,9 +88,10 @@ export default function AssignmentItem({
           )}
 
           {/* STATUS */}
+
           <button
             type="button"
-            onClick={() => onStatusChange(assignment.id)}
+            onClick={() => onStatusChange(assignment)}
             title="Click to change status"
             className={`min-w-[92px] rounded-md px-3 py-1.5 text-[9px] font-semibold transition-all duration-200 hover:scale-105 ${
               assignment.status === "DONE"
@@ -99,9 +105,11 @@ export default function AssignmentItem({
           </button>
 
           {/* EDIT */}
+
           <button
             type="button"
             title="Edit assignment"
+            onClick={() => onEdit(assignment)}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[#94a3b8] transition-all hover:bg-[#f1f3f5] hover:text-[#263548]"
           >
             <svg
@@ -117,6 +125,7 @@ export default function AssignmentItem({
                 strokeLinejoin="round"
                 d="M16.862 3.487a2.1 2.1 0 0 1 2.97 2.97L8.25 18.039l-4.5 1.125 1.125-4.5L16.862 3.487Z"
               />
+
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -126,9 +135,11 @@ export default function AssignmentItem({
           </button>
 
           {/* DELETE */}
+
           <button
             type="button"
             title="Delete assignment"
+            onClick={() => onDelete(assignment)}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[#b5a0a0] transition-all hover:bg-[#fdeeee] hover:text-[#d66b6b]"
           >
             <svg
@@ -140,32 +151,35 @@ export default function AssignmentItem({
               className="h-4 w-4"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18" />
+
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V6"
               />
+
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M19 6l-1 14H6L5 6"
               />
+
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 10v6" />
+
               <path strokeLinecap="round" strokeLinejoin="round" d="M14 10v6" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* ================= MOBILE ACTIONS ================= */}
+      {/* MOBILE ACTIONS */}
+
       <div className="mt-3 ml-7 flex flex-wrap items-center gap-2 sm:hidden">
-        {/* PRIORITY */}
         {assignment.priority && (
           <button
             type="button"
-            onClick={() => onPriorityChange(assignment.id)}
-            title="Click to change priority"
-            className={`rounded-md px-2.5 py-1.5 text-[9px] font-semibold transition-all duration-200 active:scale-95 ${
+            onClick={() => onPriorityChange(assignment)}
+            className={`rounded-md px-2.5 py-1.5 text-[9px] font-semibold ${
               assignment.priority === "HIGH"
                 ? "bg-[#fde8e8] text-[#dc6b6b]"
                 : assignment.priority === "MEDIUM"
@@ -177,12 +191,10 @@ export default function AssignmentItem({
           </button>
         )}
 
-        {/* STATUS */}
         <button
           type="button"
-          onClick={() => onStatusChange(assignment.id)}
-          title="Click to change status"
-          className={`rounded-md px-3 py-1.5 text-[9px] font-semibold transition-all duration-200 active:scale-95 ${
+          onClick={() => onStatusChange(assignment)}
+          className={`rounded-md px-3 py-1.5 text-[9px] font-semibold ${
             assignment.status === "DONE"
               ? "bg-[#e7f1e7] text-[#719471]"
               : assignment.status === "WORKING"
@@ -193,11 +205,11 @@ export default function AssignmentItem({
           {assignment.status}
         </button>
 
-        {/* EDIT */}
         <button
           type="button"
           title="Edit assignment"
-          className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-[#94a3b8] transition-all hover:bg-[#f1f3f5] hover:text-[#263548]"
+          onClick={() => onEdit(assignment)}
+          className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-[#94a3b8] hover:bg-[#f1f3f5] hover:text-[#263548]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -212,6 +224,7 @@ export default function AssignmentItem({
               strokeLinejoin="round"
               d="M16.862 3.487a2.1 2.1 0 0 1 2.97 2.97L8.25 18.039l-4.5 1.125 1.125-4.5L16.862 3.487Z"
             />
+
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -220,11 +233,11 @@ export default function AssignmentItem({
           </svg>
         </button>
 
-        {/* DELETE */}
         <button
           type="button"
           title="Delete assignment"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-[#b5a0a0] transition-all hover:bg-[#fdeeee] hover:text-[#d66b6b]"
+          onClick={() => onDelete(assignment)}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[#b5a0a0] hover:bg-[#fdeeee] hover:text-[#d66b6b]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -235,17 +248,21 @@ export default function AssignmentItem({
             className="h-4 w-4"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18" />
+
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V6"
             />
+
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               d="M19 6l-1 14H6L5 6"
             />
+
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 10v6" />
+
             <path strokeLinecap="round" strokeLinejoin="round" d="M14 10v6" />
           </svg>
         </button>

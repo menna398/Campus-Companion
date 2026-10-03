@@ -1,20 +1,14 @@
 import { create } from "zustand";
-import {
-  getCourses,
-  updateCourse as updateCourseRequest,
-} from "../services/courseService";
+import { getCourses, updateCourse } from "../services/courseService";
 
 const useCourseStore = create((set) => ({
   courses: [],
-  loading: false,
-  updating: false,
+  loading: true,
   error: null,
+  updating: false,
 
   fetchCourses: async () => {
-    set({
-      loading: true,
-      error: null,
-    });
+    set({ loading: true, error: null });
 
     try {
       const courses = await getCourses();
@@ -37,19 +31,14 @@ const useCourseStore = create((set) => ({
   },
 
   updateCourse: async (courseId, courseData) => {
-    set({
-      updating: true,
-      error: null,
-    });
+    set({ updating: true, error: null });
 
     try {
-      const updatedCourse = await updateCourseRequest(courseId, courseData);
+      const updatedCourse = await updateCourse(courseId, courseData);
 
       set((state) => ({
         courses: state.courses.map((course) =>
-          course.id === courseId || course._id === courseId
-            ? updatedCourse
-            : course,
+          course.id === courseId ? updatedCourse : course,
         ),
         updating: false,
         error: null,

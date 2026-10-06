@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+
 import CoursesCards from "../../components/courses/CoursesCards";
+import CourseModal from "../../components/courses/CourseModal";
 import useCourseStore from "../../store/courseStore";
 
 export default function Courses() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
-  const { courses, loading, error, fetchCourses } = useCourseStore();
+  const {
+    courses,
+    loading,
+    error,
+    saving,
+    fetchCourses,
+    addCourse,
+    removeCourse,
+  } = useCourseStore();
 
   useEffect(() => {
     fetchCourses();
@@ -15,12 +28,102 @@ export default function Courses() {
     const search = searchTerm.toLowerCase().trim();
 
     return (
-      course.title.toLowerCase().includes(search) ||
-      course.code.toLowerCase().includes(search) ||
-      course.professor.toLowerCase().includes(search) ||
-      course.location.toLowerCase().includes(search)
+      course.title?.toLowerCase().includes(search) ||
+      course.code?.toLowerCase().includes(search) ||
+      course.professor?.toLowerCase().includes(search) ||
+      course.location?.toLowerCase().includes(search)
     );
   });
+
+  // =========================
+  // ADD COURSE
+  // =========================
+
+  const handleAddCourse = () => {
+    setSelectedCourse(null);
+    setIsModalOpen(true);
+  };
+
+  // =========================
+  // CLOSE MODAL
+  // =========================
+
+  const handleCloseModal = () => {
+    if (saving) return;
+
+    setIsModalOpen(false);
+    setSelectedCourse(null);
+  };
+
+  // =========================
+  // SAVE COURSE
+  // =========================
+
+  const handleSaveCourse = async (courseData) => {
+    try {
+      await addCourse(courseData);
+
+      setIsModalOpen(false);
+      setSelectedCourse(null);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Course Added",
+        text: "The course has been added successfully.",
+        confirmButtonColor: "#7094b8",
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to add the course.",
+        confirmButtonColor: "#a06464",
+      });
+    }
+  };
+
+  // =========================
+  // DELETE COURSE
+  // =========================
+
+  const handleDeleteCourse = async (course) => {
+    const result = await Swal.fire({
+      title: "Delete Course?",
+      text: `Are you sure you want to delete "${course.title}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#a06464",
+      cancelButtonColor: "#89949d",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await removeCourse(course.id);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Course Deleted",
+        text: "The course has been deleted successfully.",
+        confirmButtonColor: "#7094b8",
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to delete the course.",
+        confirmButtonColor: "#a06464",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#faf9f7] px-4 py-8 sm:px-6 lg:px-9">
@@ -104,7 +207,39 @@ export default function Courses() {
       ) : filteredCourses.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredCourses.map((course) => (
-            <CoursesCards key={course.id} course={course} />
+            <div key={course.id} className="relative">
+              <CoursesCards course={course} />
+
+              {/* Delete */}
+
+              <button
+                type="button"
+                onClick={() => handleDeleteCourse(course)}
+                disabled={saving}
+                className="
+                  absolute
+                  right-3
+                  top-3
+                  z-10
+                  flex
+                  h-7
+                  w-7
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-white
+                  text-[#a06464]
+                  shadow-sm
+                  transition
+                  hover:bg-[#fff5f5]
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+                title="Delete course"
+              >
+                🗑
+              </button>
+            </div>
           ))}
         </div>
       ) : (
@@ -122,6 +257,7 @@ export default function Courses() {
       <div className="mt-7 flex justify-center">
         <button
           type="button"
+          onClick={handleAddCourse}
           className="
             rounded-lg
             border
@@ -142,6 +278,16 @@ export default function Courses() {
           + Add New Course
         </button>
       </div>
+
+      {/* ================= COURSE MODAL ================= */}
+
+      <CourseModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveCourse}
+        course={selectedCourse}
+        saving={saving}
+      />
     </div>
   );
 }

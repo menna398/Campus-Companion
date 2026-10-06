@@ -7,6 +7,11 @@ import AssignmentModal from "../../components/assignments/AssignmentModal";
 import useAssignmentStore from "../../store/assignmentStore";
 import useCourseStore from "../../store/courseStore";
 
+import {
+  getAssignmentDeadlineState,
+  sortAssignmentsByDueDate,
+} from "../../utils/assignmentDate";
+
 export default function Assignments() {
   const [filter, setFilter] = useState("all");
 
@@ -47,7 +52,8 @@ export default function Assignments() {
 
     const currentIndex = priorityOrder.indexOf(assignment.priority);
 
-    const nextIndex = (currentIndex + 1) % priorityOrder.length;
+    const nextIndex =
+      currentIndex === -1 ? 0 : (currentIndex + 1) % priorityOrder.length;
 
     try {
       await editAssignment(assignment.id, {
@@ -77,7 +83,8 @@ export default function Assignments() {
 
     const currentIndex = statusOrder.indexOf(assignment.status);
 
-    const nextIndex = (currentIndex + 1) % statusOrder.length;
+    const nextIndex =
+      currentIndex === -1 ? 0 : (currentIndex + 1) % statusOrder.length;
 
     try {
       await editAssignment(assignment.id, {
@@ -224,6 +231,12 @@ export default function Assignments() {
     }
   };
 
+  /*
+   * =========================================
+   * CLOSE MODAL
+   * =========================================
+   */
+
   const handleClose = () => {
     if (saving) return;
 
@@ -233,17 +246,55 @@ export default function Assignments() {
 
   /*
    * =========================================
-   * FILTER
+   * UPCOMING
    * =========================================
    */
 
-  const upcomingAssignments = assignments.filter(
-    (assignment) => assignment.status !== "DONE",
+  const upcomingAssignments = sortAssignmentsByDueDate(
+    assignments.filter((assignment) => {
+      if (assignment.status === "DONE") {
+        return false;
+      }
+
+      const { isMissed } = getAssignmentDeadlineState(assignment);
+
+      return !isMissed;
+    }),
   );
 
-  const completedAssignments = assignments.filter(
-    (assignment) => assignment.status === "DONE",
+  /*
+   * =========================================
+   * MISSED
+   * =========================================
+   */
+
+  const missedAssignments = sortAssignmentsByDueDate(
+    assignments.filter((assignment) => {
+      if (assignment.status === "DONE") {
+        return false;
+      }
+
+      const { isMissed } = getAssignmentDeadlineState(assignment);
+
+      return isMissed;
+    }),
   );
+
+  /*
+   * =========================================
+   * COMPLETED
+   * =========================================
+   */
+
+  const completedAssignments = sortAssignmentsByDueDate(
+    assignments.filter((assignment) => assignment.status === "DONE"),
+  );
+
+  /*
+   * =========================================
+   * RENDER
+   * =========================================
+   */
 
   return (
     <div className="min-h-screen w-full bg-[#faf9f7] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
@@ -342,6 +393,33 @@ export default function Assignments() {
               </div>
             )}
 
+            {/* MISSED */}
+
+            {(filter === "upcoming" || filter === "all") &&
+              missedAssignments.length > 0 && (
+                <div className="mt-6 sm:mt-8">
+                  <div className="mb-2 flex items-center gap-3 px-2 sm:px-3">
+                    <h3 className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide text-[#c96f6f] sm:text-xs">
+                      Missed
+                    </h3>
+
+                    <div className="h-px flex-1 bg-[#f1d5d5]" />
+                  </div>
+
+                  {missedAssignments.map((assignment) => (
+                    <AssignmentItem
+                      key={assignment.id}
+                      assignment={assignment}
+                      onPriorityChange={handlePriorityChange}
+                      onStatusChange={handleStatusChange}
+                      onComplete={handleComplete}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              )}
+
             {/* COMPLETED */}
 
             {(filter === "completed" || filter === "all") && (
@@ -376,6 +454,8 @@ export default function Assignments() {
           </>
         )}
       </div>
+
+      {/* ASSIGNMENT MODAL */}
 
       <AssignmentModal
         isOpen={isModalOpen}

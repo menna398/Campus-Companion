@@ -172,13 +172,20 @@ export default function AssignmentModal({
 
             <input
               type="text"
-              name="dueDate"
               value={formData.dueDate}
-              onChange={handleChange}
-              placeholder="e.g. Oct 25, 2026"
-              disabled={saving}
-              className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2.5 text-[10px] text-[#3d4a55] outline-none focus:border-[#7094b8] focus:bg-white"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  dueDate: e.target.value,
+                }))
+              }
+              placeholder="DD/Mon"
+              className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2.5 text-xs text-[#273545] outline-none transition focus:border-[#7094b8]"
             />
+
+            <p className="mt-1.5 text-[9px] text-[#89949d]">
+              Examples: 11/11, 11/nov, or 11/11/2026
+            </p>
           </div>
 
           {/* PRIORITY */}

@@ -1,3 +1,5 @@
+import { getAssignmentDeadlineState } from "../../utils/assignmentDate";
+
 export default function AssignmentItem({
   assignment,
   onPriorityChange,
@@ -8,12 +10,16 @@ export default function AssignmentItem({
 }) {
   const isDone = assignment.status === "DONE";
 
-  const isOverdue = assignment.dueDate?.toLowerCase().includes("due oct");
+  const { isDueSoon, isMissed } = getAssignmentDeadlineState(assignment);
 
   return (
     <div
-      className={`group border-b border-[#eeeae5] px-2 py-4 transition-all duration-200 last:border-b-0 hover:bg-[#faf9f7] sm:px-3 ${
-        isDone ? "bg-[#fafafa]" : ""
+      className={`group border-b px-2 py-4 transition-all duration-200 last:border-b-0 sm:px-3 ${
+        isMissed && !isDone
+          ? "border-[#f1d5d5] bg-[#fff7f7] hover:bg-[#fff3f3]"
+          : isDone
+            ? "border-[#eeeae5] bg-[#fafafa]"
+            : "border-[#eeeae5] hover:bg-[#faf9f7]"
       }`}
     >
       <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4">
@@ -28,7 +34,9 @@ export default function AssignmentItem({
               ? "border-[#91aa91] bg-[#91aa91]"
               : assignment.status === "WORKING"
                 ? "border-[#7094b8] hover:bg-[#e7eef7]"
-                : "border-[#94a3b8] hover:border-[#7094b8]"
+                : isMissed
+                  ? "border-[#d77b7b] hover:bg-[#fde8e8]"
+                  : "border-[#94a3b8] hover:border-[#7094b8]"
           }`}
         >
           {isDone && <span className="text-[9px] font-bold text-white">✓</span>}
@@ -41,7 +49,9 @@ export default function AssignmentItem({
             className={`break-words text-xs font-medium leading-5 transition-all sm:text-sm ${
               isDone
                 ? "text-[#8b9aaa] line-through decoration-[#8b9aaa]"
-                : "text-[#263548]"
+                : isMissed
+                  ? "text-[#b96767]"
+                  : "text-[#263548]"
             }`}
           >
             {assignment.title}
@@ -52,16 +62,47 @@ export default function AssignmentItem({
               isDone ? "line-through" : ""
             }`}
           >
-            <span className={isDone ? "text-[#a5b0ba]" : "text-[#7094b8]"}>
+            <span
+              className={
+                isDone
+                  ? "text-[#a5b0ba]"
+                  : isMissed
+                    ? "text-[#c57979]"
+                    : "text-[#7094b8]"
+              }
+            >
               {assignment.courseCode}
             </span>
 
             <span className="text-[#d0cbc5]">•</span>
 
-            <span className="text-[#a0aab5]">
-              {isOverdue && !isDone && "OVERDUE "}
-              {assignment.dueDate}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={
+                  isMissed && !isDone
+                    ? "font-medium text-[#c96f6f]"
+                    : "text-[#a0aab5]"
+                }
+              >
+                {assignment.dueDate}
+              </span>
+
+              {/* DUE SOON */}
+
+              {isDueSoon && !isDone && (
+                <span className="rounded-md bg-[#fde8e8] px-2 py-1 text-[8px] font-semibold uppercase tracking-wide text-[#c85f5f]">
+                  Due Soon
+                </span>
+              )}
+
+              {/* MISSED */}
+
+              {isMissed && !isDone && (
+                <span className="rounded-md bg-[#f5dada] px-2 py-1 text-[8px] font-bold uppercase tracking-wide text-[#bd5d5d]">
+                  Missed
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -98,7 +139,9 @@ export default function AssignmentItem({
                 ? "bg-[#e7f1e7] text-[#719471] hover:bg-[#dcebdd]"
                 : assignment.status === "WORKING"
                   ? "bg-[#e7eef7] text-[#6485aa] hover:bg-[#dce7f3]"
-                  : "bg-[#f1f2f3] text-[#7c8793] hover:bg-[#e8eaec]"
+                  : isMissed
+                    ? "bg-[#fde8e8] text-[#c56c6c] hover:bg-[#fbdada]"
+                    : "bg-[#f1f2f3] text-[#7c8793] hover:bg-[#e8eaec]"
             }`}
           >
             {assignment.status}
@@ -199,7 +242,9 @@ export default function AssignmentItem({
               ? "bg-[#e7f1e7] text-[#719471]"
               : assignment.status === "WORKING"
                 ? "bg-[#e7eef7] text-[#6485aa]"
-                : "bg-[#f1f2f3] text-[#7c8793]"
+                : isMissed
+                  ? "bg-[#fde8e8] text-[#c56c6c]"
+                  : "bg-[#f1f2f3] text-[#7c8793]"
           }`}
         >
           {assignment.status}

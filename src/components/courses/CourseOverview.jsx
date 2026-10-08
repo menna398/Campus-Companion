@@ -69,35 +69,45 @@ export default function CourseOverview() {
           </h2>
 
           <div className="mt-5 space-y-4">
-            <div className="flex items-center justify-between">
+            {/* Professor */}
+
+            <div className="flex items-center justify-between gap-4">
               <span className="text-[9px] text-[#89949d]">Professor</span>
 
-              <span className="text-[9px] font-semibold text-[#3d4a55]">
+              <span className="text-right text-[9px] font-semibold text-[#3d4a55]">
                 {course.professor}
               </span>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* Location */}
+
+            <div className="flex items-center justify-between gap-4">
               <span className="text-[9px] text-[#89949d]">Location</span>
 
-              <span className="text-[9px] font-semibold text-[#3d4a55]">
+              <span className="text-right text-[9px] font-semibold text-[#3d4a55]">
                 {course.location}
               </span>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* Credits */}
+
+            <div className="flex items-center justify-between gap-4">
               <span className="text-[9px] text-[#89949d]">Credits</span>
 
-              <span className="text-[9px] font-semibold text-[#3d4a55]">
+              <span className="text-right text-[9px] font-semibold text-[#3d4a55]">
                 {course.credits}
               </span>
             </div>
+
+            {/* Schedule */}
 
             <div>
               <span className="text-[9px] text-[#89949d]">Schedule</span>
 
               <p className="mt-1 text-[9px] font-semibold text-[#3d4a55]">
-                {course.schedule}
+                {course.schedule?.day
+                  ? `${course.schedule.day} • ${course.schedule.startTime} - ${course.schedule.endTime}`
+                  : "No schedule available"}
               </p>
             </div>
           </div>

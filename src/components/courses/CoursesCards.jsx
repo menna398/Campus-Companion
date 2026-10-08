@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 
 export default function CoursesCards({ course }) {
+  const schedule = course.schedule;
+
+  const scheduleText = schedule?.day
+    ? `${schedule.day} • ${schedule.startTime} - ${schedule.endTime}`
+    : "No schedule available";
+
   return (
     <Link
       to={`/courses/${course.id}`}
@@ -42,7 +48,7 @@ export default function CoursesCards({ course }) {
         {course.professor} • {course.location}
       </p>
 
-      <p className="mb-4 text-[9px] text-[#8a97a3]">{course.schedule}</p>
+      <p className="mb-4 text-[9px] text-[#8a97a3]">{scheduleText}</p>
 
       <div className="mb-1.5 flex justify-between text-[8.5px] font-semibold">
         <span className="text-[#66727d]">Syllabus Progress</span>
@@ -62,7 +68,7 @@ export default function CoursesCards({ course }) {
           className="h-[5px] w-[5px] rounded-full"
           style={{ backgroundColor: course.color }}
         />
-        Next: {course.schedule}
+        Next: {scheduleText}
       </p>
     </Link>
   );

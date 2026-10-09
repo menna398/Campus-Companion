@@ -187,7 +187,9 @@ export function getAssignmentDeadlineState(assignment) {
 
   const isMissed = difference < 0;
 
-  const isDueSoon = difference >= 0 && hoursRemaining <= 48;
+  const isDueSoon =
+    difference >= 0 &&
+    hoursRemaining <= 48;
 
   return {
     date,
@@ -224,7 +226,10 @@ export function sortAssignmentsByDueDate(assignments) {
 
       if (!bState.date) return -1;
 
-      return aState.date.getTime() - bState.date.getTime();
+      return (
+        aState.date.getTime() -
+        bState.date.getTime()
+      );
     }
 
     /*
@@ -247,6 +252,9 @@ export function sortAssignmentsByDueDate(assignments) {
      * Nearest deadline first.
      */
 
-    return aState.date.getTime() - bState.date.getTime();
+    return (
+      aState.date.getTime() -
+      bState.date.getTime()
+    );
   });
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://campus-companion-back.vercel.app/api";
 
 // "token" is the key every other service (events, notes, ...) already reads.
 const TOKEN_KEY = "token";

@@ -87,13 +87,6 @@ export default function CourseEditModal({ course, isOpen, onClose }) {
         title: formData.title,
         professor: formData.professor,
         location: formData.location,
-
-        schedule: {
-          day: formData.schedule.day,
-          startTime: formData.schedule.startTime,
-          endTime: formData.schedule.endTime,
-        },
-
         credits: formData.credits,
         progress: formData.progress,
         nextClass: formData.nextClass,
@@ -199,30 +192,6 @@ export default function CourseEditModal({ course, isOpen, onClose }) {
               />
             </div>
 
-            {/* Day */}
-
-            <div>
-              <label className="mb-1 block text-[9px] font-medium text-[#687681]">
-                Day
-              </label>
-
-              <select
-                name="day"
-                value={formData.schedule.day}
-                onChange={handleScheduleChange}
-                className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2 text-xs text-[#273545] outline-none focus:border-[#91aa91]"
-              >
-                <option value="">Select day</option>
-                <option value="Saturday">Saturday</option>
-                <option value="Sunday">Sunday</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-              </select>
-            </div>
-
             {/* Credits */}
 
             <div>
@@ -234,54 +203,6 @@ export default function CourseEditModal({ course, isOpen, onClose }) {
                 type="number"
                 name="credits"
                 value={formData.credits}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2 text-xs text-[#273545] outline-none focus:border-[#91aa91]"
-              />
-            </div>
-
-            {/* Start Time */}
-
-            <div>
-              <label className="mb-1 block text-[9px] font-medium text-[#687681]">
-                Start Time
-              </label>
-
-              <input
-                type="time"
-                name="startTime"
-                value={formData.schedule.startTime}
-                onChange={handleScheduleChange}
-                className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2 text-xs text-[#273545] outline-none focus:border-[#91aa91]"
-              />
-            </div>
-
-            {/* End Time */}
-
-            <div>
-              <label className="mb-1 block text-[9px] font-medium text-[#687681]">
-                End Time
-              </label>
-
-              <input
-                type="time"
-                name="endTime"
-                value={formData.schedule.endTime}
-                onChange={handleScheduleChange}
-                className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2 text-xs text-[#273545] outline-none focus:border-[#91aa91]"
-              />
-            </div>
-
-            {/* Next Class */}
-
-            <div>
-              <label className="mb-1 block text-[9px] font-medium text-[#687681]">
-                Next Class
-              </label>
-
-              <input
-                type="text"
-                name="nextClass"
-                value={formData.nextClass}
                 onChange={handleChange}
                 className="w-full rounded-lg border border-[#e1ddd7] bg-[#faf9f7] px-3 py-2 text-xs text-[#273545] outline-none focus:border-[#91aa91]"
               />

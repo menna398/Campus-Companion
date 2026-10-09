@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 
 import useCourseStore from "../../store/courseStore";
 import useEventStore from "../../store/eventStore";
-import useDashboardStore from "../../store/dashboardStore";
+import useDashboardStore from "../../store/Dashboardstore";
 
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import TodaySchedule from "../../components/dashboard/TodaySchedule";

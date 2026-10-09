@@ -6,7 +6,7 @@ import useCourseStore from "../../store/courseStore";
 import useEventStore from "../../store/eventStore";
 import useDashboardStore from "../../store/Dashboardstore";
 
-import DashboardHeader from "../../components/dashboard/dashboardHeader";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import TodaySchedule from "../../components/dashboard/TodaySchedule";
 import CourseProgress from "../../components/dashboard/CourseProgress";
 import UpcomingAssignments from "../../components/dashboard/UpcomingAssignments";

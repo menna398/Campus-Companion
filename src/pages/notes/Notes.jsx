@@ -72,6 +72,16 @@ function getNoteId(note) {
   return note?.id || note?._id;
 }
 
+const GENERAL_NOTEBOOK = "__general__";
+
+function notebookButtonClass(isActive) {
+  return `flex w-full items-center justify-between rounded-lg border px-2.5 py-2 text-left transition ${
+    isActive
+      ? "border-[#D6CCC0] bg-[#F3EEE8]"
+      : "border-transparent hover:border-[#E8E3DD] hover:bg-[#FAF9F7]"
+  }`;
+}
+
 export default function Notes() {
   const { notes, loading, error, fetchNotes, removeNote } = useNoteStore();
 
@@ -81,6 +91,7 @@ export default function Notes() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
+  const [selectedNotebook, setSelectedNotebook] = useState(null);
 
   useEffect(() => {
     fetchNotes();
@@ -148,6 +159,40 @@ export default function Notes() {
         };
       });
   }, [courses, notes]);
+
+  // Notes shown in the main area: search + selected notebook.
+  const visibleNotes = useMemo(() => {
+    if (!selectedNotebook) return filteredNotes;
+
+    if (selectedNotebook === GENERAL_NOTEBOOK) {
+      return filteredNotes.filter((note) => !note.courseCode);
+    }
+
+    return filteredNotes.filter((note) => note.courseCode === selectedNotebook);
+  }, [filteredNotes, selectedNotebook]);
+
+  const activeNotebookName =
+    selectedNotebook === GENERAL_NOTEBOOK
+      ? "General Notes"
+      : (() => {
+          const notebook = notebooks.find(
+            (item) => item.code === selectedNotebook,
+          );
+
+          return notebook
+            ? `${notebook.code} — ${notebook.name}`
+            : selectedNotebook || "";
+        })();
+
+  function handleSelectNotebook(notebookKey) {
+    // Clicking the active notebook again goes back to all notes.
+    setSelectedNotebook((current) =>
+      current === notebookKey ? null : notebookKey,
+    );
+
+    // Leave the opened note so the notebook's notes are visible.
+    setSelectedNote(null);
+  }
 
   function handleAddNote() {
     setEditingNote(null);
@@ -262,7 +307,7 @@ export default function Notes() {
             </p>
 
             {/* Search Results / Notebooks */}
-            {search.trim() ? (
+            {search.trim() && (
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h2 className="text-[10px] font-medium uppercase tracking-wide text-[#7C8996]">
@@ -324,42 +369,67 @@ export default function Notes() {
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="mt-6">
-                <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wide text-[#7C8996]">
-                  Notebooks
-                </h2>
-                <div className="space-y-1">
-                  {notebooks.map((notebook) => (
-                    <div
-                      key={notebook.id}
-                      className="flex w-full items-center justify-between rounded-lg px-2.5 py-2"
-                    >
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span
-                          className="h-2 w-2 shrink-0 rounded-sm"
-                          style={{ backgroundColor: notebook.color }}
-                        />
-                        <span className="truncate text-[11px] font-medium text-[#526274]">
-                          {notebook.code} — {notebook.name}
-                        </span>
-                      </div>
-                      <span className="ml-2 text-[9px] text-[#9AA3AD]">
-                        {notebook.count}
+            )}
+
+            {/* Notebooks (always visible) */}
+            <div className="mt-6">
+              <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wide text-[#7C8996]">
+                Notebooks
+              </h2>
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => handleSelectNotebook(null)}
+                  className={notebookButtonClass(!selectedNotebook)}
+                >
+                  <span className="text-[11px] font-medium text-[#526274]">
+                    All Notes
+                  </span>
+                  <span className="text-[9px] text-[#9AA3AD]">
+                    {notes.length}
+                  </span>
+                </button>
+
+                {notebooks.map((notebook) => (
+                  <button
+                    key={notebook.id}
+                    type="button"
+                    onClick={() => handleSelectNotebook(notebook.code)}
+                    className={notebookButtonClass(
+                      selectedNotebook === notebook.code,
+                    )}
+                  >
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-sm"
+                        style={{ backgroundColor: notebook.color }}
+                      />
+                      <span className="truncate text-[11px] font-medium text-[#526274]">
+                        {notebook.code} — {notebook.name}
                       </span>
                     </div>
-                  ))}
-                  <div className="flex items-center justify-between rounded-lg px-2.5 py-2">
-                    <span className="text-[11px] font-medium text-[#526274]">
-                      General Notes
+                    <span className="ml-2 text-[9px] text-[#9AA3AD]">
+                      {notebook.count}
                     </span>
-                    <span className="text-[9px] text-[#9AA3AD]">
-                      {notes.filter((note) => !note.courseCode).length}
-                    </span>
-                  </div>
-                </div>
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectNotebook(GENERAL_NOTEBOOK)}
+                  className={notebookButtonClass(
+                    selectedNotebook === GENERAL_NOTEBOOK,
+                  )}
+                >
+                  <span className="text-[11px] font-medium text-[#526274]">
+                    General Notes
+                  </span>
+                  <span className="text-[9px] text-[#9AA3AD]">
+                    {notes.filter((note) => !note.courseCode).length}
+                  </span>
+                </button>
               </div>
-            )}
+            </div>
           </aside>
 
           {/* Main Area */}
@@ -368,11 +438,13 @@ export default function Notes() {
               <>
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-[10px] font-medium uppercase tracking-wide text-[#81909D]">
-                    Recently Viewed Notes
+                    {selectedNotebook
+                      ? activeNotebookName
+                      : "Recently Viewed Notes"}
                   </h2>
 
                   <span className="text-[9px] text-[#9AA3AD]">
-                    {notes.length} notes
+                    {visibleNotes.length} notes
                   </span>
                 </div>
 
@@ -396,9 +468,9 @@ export default function Notes() {
                       Try Again
                     </button>
                   </div>
-                ) : notes.length > 0 ? (
+                ) : visibleNotes.length > 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {notes.map((note) => (
+                    {visibleNotes.map((note) => (
                       <NoteCard
                         key={getNoteId(note)}
                         note={{
@@ -417,7 +489,9 @@ export default function Notes() {
                     </p>
 
                     <p className="mt-1 text-xs text-[#9AA3AD]">
-                      Create your first note to get started.
+                      {notes.length > 0
+                        ? "Try another notebook or search keyword."
+                        : "Create your first note to get started."}
                     </p>
 
                     {

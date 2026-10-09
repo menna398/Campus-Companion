@@ -9,12 +9,12 @@ export default function NoteCard({ note, onClick }) {
       <div className="mb-3 flex items-center justify-between gap-2">
         <span
           className="text-[9px] font-medium"
-          style={{ color: note.notebookColor }}
+          style={{ color: note.notebookColor || "#6F91B5" }}
         >
-          {note.courseCode}
+          {note.courseCode || "General Note"}
         </span>
 
-        <span className="text-[9px] text-[#9AA3AD]">{note.date}</span>
+        <span className="text-[9px] text-[#9AA3AD]">{note.date || ""}</span>
       </div>
 
       {/* Title */}

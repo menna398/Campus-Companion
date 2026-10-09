@@ -1,6 +1,11 @@
-import { useMemo, useState } from "react";
-import NoteCard from "../../components/ui/NoteCard";
-import { notes as notesData, notebooks } from "../../data/notesData";
+import { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
+
+import NoteCard from "../../components/notes/NoteCard";
+import NoteModal from "../../components/notes/NoteModal";
+
+import useNoteStore from "../../store/noteStore";
+import useCourseStore from "../../store/courseStore";
 
 function SearchIcon() {
   return (
@@ -63,71 +68,151 @@ function DeleteIcon() {
   );
 }
 
+function getNoteId(note) {
+  return note?.id || note?._id;
+}
+
 export default function Notes() {
-  const [allNotes, setAllNotes] = useState(notesData);
+  const { notes, loading, error, fetchNotes, removeNote } = useNoteStore();
+
+  const { courses, fetchCourses } = useCourseStore();
+
   const [selectedNote, setSelectedNote] = useState(null);
   const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
+
+  useEffect(() => {
+    fetchNotes();
+    fetchCourses();
+  }, [fetchNotes, fetchCourses]);
+
+  // Keep the selected note in sync after editing.
+  useEffect(() => {
+    if (!selectedNote) return;
+
+    const updatedNote = notes.find(
+      (note) => String(getNoteId(note)) === String(getNoteId(selectedNote)),
+    );
+
+    if (updatedNote) {
+      setSelectedNote(updatedNote);
+    } else {
+      setSelectedNote(null);
+    }
+  }, [notes]);
 
   const filteredNotes = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return allNotes;
-    }
+    if (!query) return notes;
 
-    return allNotes.filter((note) => {
+    return notes.filter((note) => {
+      const sections = Array.isArray(note.sections) ? note.sections : [];
+
       const searchableContent = [
         note.title,
         note.description,
         note.courseCode,
         note.courseName,
         note.lastEdited,
+        note.date,
         note.code,
-        ...note.sections.flatMap((section) => [
+        ...sections.flatMap((section) => [
           section.title,
-          ...section.points,
+          ...(Array.isArray(section.points) ? section.points : []),
         ]),
       ]
+        .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
       return searchableContent.includes(query);
     });
-  }, [allNotes, search]);
+  }, [notes, search]);
 
-  const handleAddNote = () => {
-    console.log("Add new note");
-  };
+  const notebooks = useMemo(() => {
+    return courses
+      .filter((course) => course.code)
+      .map((course) => {
+        const courseNotes = notes.filter(
+          (note) => note.courseCode === course.code,
+        );
 
-  const handleEditNote = () => {
+        return {
+          id: course.id || course._id || course.code,
+          code: course.code,
+          name: course.title || course.name || course.code,
+          color: course.color || courseNotes[0]?.notebookColor || "#6F91B5",
+          count: courseNotes.length,
+        };
+      });
+  }, [courses, notes]);
+
+  function handleAddNote() {
+    setEditingNote(null);
+    setShowModal(true);
+  }
+
+  function handleEditNote() {
     if (!selectedNote) return;
 
-    console.log("Edit note:", selectedNote);
-  };
+    setEditingNote(selectedNote);
+    setShowModal(true);
+  }
 
-  const handleDeleteNote = () => {
+  async function handleDeleteNote() {
     if (!selectedNote) return;
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this note?",
-    );
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Delete Note?",
+      text: "This note will be permanently deleted.",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      confirmButtonColor: "#A96B6B",
+    });
 
-    if (!confirmed) return;
+    if (!result.isConfirmed) return;
 
-    setAllNotes((currentNotes) =>
-      currentNotes.filter((note) => note.id !== selectedNote.id),
-    );
+    try {
+      await removeNote(getNoteId(selectedNote));
 
-    setSelectedNote(null);
-  };
+      setSelectedNote(null);
 
-  const handleOpenNote = (note) => {
+      await Swal.fire({
+        icon: "success",
+        title: "Note Deleted",
+        text: "The note has been deleted successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (deleteError) {
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text:
+          deleteError.response?.data?.message ||
+          deleteError.message ||
+          "Failed to delete the note.",
+      });
+    }
+  }
+
+  function handleOpenNote(note) {
     setSelectedNote(note);
-  };
+  }
 
-  const handleCloseNote = () => {
+  function handleCloseNote() {
     setSelectedNote(null);
-  };
+  }
+
+  function handleCloseModal() {
+    setShowModal(false);
+    setEditingNote(null);
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
@@ -144,7 +229,6 @@ export default function Notes() {
             </p>
           </div>
 
-          {/* Add New Note */}
           <button
             type="button"
             onClick={handleAddNote}
@@ -160,63 +244,127 @@ export default function Notes() {
           <aside className="h-fit rounded-2xl border border-[#E8E3DD] bg-white p-4 shadow-sm">
             {/* Search */}
             <div className="relative">
-              <SearchIcon />
+              <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA3AD]">
+                <SearchIcon />
+              </div>
 
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search notes..."
                 className="w-full rounded-lg border border-[#E8E3DD] bg-[#FAF9F7] py-2.5 pl-9 pr-3 text-xs text-[#26364A] outline-none transition placeholder:text-[#A0A8B0] focus:border-[#C9BBAA]"
               />
             </div>
 
-            {/* Search hint */}
             <p className="mt-2 text-[9px] leading-relaxed text-[#9AA3AD]">
               Search by title, course, or anything inside a note.
             </p>
 
-            {/* Notebooks */}
-            <div className="mt-6">
-              <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wide text-[#7C8996]">
-                Notebooks
-              </h2>
+            {/* Search Results / Notebooks */}
+            {search.trim() ? (
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <h2 className="text-[10px] font-medium uppercase tracking-wide text-[#7C8996]">
+                    Search Results
+                  </h2>
+                  <span className="text-[9px] text-[#9AA3AD]">
+                    {filteredNotes.length}
+                  </span>
+                </div>
 
-              <div className="space-y-1">
-                {notebooks.map((notebook) => (
-                  <button
-                    key={notebook.id}
-                    type="button"
-                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left transition hover:bg-[#FAF8F5]"
-                  >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-sm"
-                        style={{
-                          backgroundColor: notebook.color,
-                        }}
-                      />
-
-                      <span className="truncate text-[11px] font-medium text-[#526274]">
-                        {notebook.code} — {notebook.name}
+                {filteredNotes.length > 0 ? (
+                  <div className="max-h-[420px] space-y-1 overflow-y-auto pr-1">
+                    {filteredNotes.map((note) => (
+                      <button
+                        key={getNoteId(note)}
+                        type="button"
+                        onClick={() => handleOpenNote(note)}
+                        className={`w-full rounded-lg border px-3 py-2.5 text-left transition ${
+                          selectedNote &&
+                          String(getNoteId(selectedNote)) ===
+                            String(getNoteId(note))
+                            ? "border-[#D6CCC0] bg-[#F3EEE8]"
+                            : "border-transparent hover:border-[#E8E3DD] hover:bg-[#FAF9F7]"
+                        }`}
+                      >
+                        <div className="mb-1 flex items-start justify-between gap-2">
+                          <span className="line-clamp-2 text-[11px] font-medium leading-snug text-[#26364A]">
+                            {note.title || "Untitled Note"}
+                          </span>
+                          <span
+                            className="mt-1 h-2 w-2 shrink-0 rounded-sm"
+                            style={{
+                              backgroundColor: note.notebookColor || "#6F91B5",
+                            }}
+                          />
+                        </div>
+                        <p className="line-clamp-2 text-[10px] leading-relaxed text-[#697586]">
+                          {note.description || "No description"}
+                        </p>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="truncate text-[9px] text-[#7C8996]">
+                            {note.courseCode || "General Note"}
+                          </span>
+                          <span className="shrink-0 text-[9px] text-[#9AA3AD]">
+                            {note.date || note.lastEdited || ""}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-[#DDD5CC] px-3 py-5 text-center">
+                    <p className="text-[11px] font-medium text-[#526274]">
+                      No notes found
+                    </p>
+                    <p className="mt-1 text-[10px] text-[#9AA3AD]">
+                      Try another title, course, or keyword.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-6">
+                <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wide text-[#7C8996]">
+                  Notebooks
+                </h2>
+                <div className="space-y-1">
+                  {notebooks.map((notebook) => (
+                    <div
+                      key={notebook.id}
+                      className="flex w-full items-center justify-between rounded-lg px-2.5 py-2"
+                    >
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-sm"
+                          style={{ backgroundColor: notebook.color }}
+                        />
+                        <span className="truncate text-[11px] font-medium text-[#526274]">
+                          {notebook.code} — {notebook.name}
+                        </span>
+                      </div>
+                      <span className="ml-2 text-[9px] text-[#9AA3AD]">
+                        {notebook.count}
                       </span>
                     </div>
-
-                    <span className="ml-2 text-[9px] text-[#9AA3AD]">
-                      {notebook.count}
+                  ))}
+                  <div className="flex items-center justify-between rounded-lg px-2.5 py-2">
+                    <span className="text-[11px] font-medium text-[#526274]">
+                      General Notes
                     </span>
-                  </button>
-                ))}
+                    <span className="text-[9px] text-[#9AA3AD]">
+                      {notes.filter((note) => !note.courseCode).length}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </aside>
 
           {/* Main Area */}
           <section className="min-w-0">
             {!selectedNote ? (
-              /* =========================
-                 NOTES GRID
-              ========================= */
               <>
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-[10px] font-medium uppercase tracking-wide text-[#81909D]">
@@ -224,16 +372,40 @@ export default function Notes() {
                   </h2>
 
                   <span className="text-[9px] text-[#9AA3AD]">
-                    {filteredNotes.length} notes
+                    {notes.length} notes
                   </span>
                 </div>
 
-                {filteredNotes.length > 0 ? (
+                {loading ? (
+                  <div className="rounded-2xl border border-[#E8E3DD] bg-white px-6 py-16 text-center">
+                    <p className="text-xs text-[#697586]">Loading notes...</p>
+                  </div>
+                ) : error ? (
+                  <div className="rounded-2xl border border-red-100 bg-white px-6 py-10 text-center">
+                    <p className="text-sm font-medium text-red-600">
+                      Failed to load notes
+                    </p>
+
+                    <p className="mt-2 text-xs text-[#697586]">{error}</p>
+
+                    <button
+                      type="button"
+                      onClick={fetchNotes}
+                      className="mt-4 rounded-lg bg-[#26364A] px-4 py-2 text-xs text-white"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : notes.length > 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {filteredNotes.map((note) => (
+                    {notes.map((note) => (
                       <NoteCard
-                        key={note.id}
-                        note={note}
+                        key={getNoteId(note)}
+                        note={{
+                          ...note,
+                          courseCode: note.courseCode || "General",
+                          notebookColor: note.notebookColor || "#6F91B5",
+                        }}
                         onClick={() => handleOpenNote(note)}
                       />
                     ))}
@@ -245,20 +417,26 @@ export default function Notes() {
                     </p>
 
                     <p className="mt-1 text-xs text-[#9AA3AD]">
-                      Try searching with another title or keyword.
+                      Create your first note to get started.
                     </p>
+
+                    {
+                      <button
+                        type="button"
+                        onClick={handleAddNote}
+                        className="mt-4 rounded-lg bg-[#26364A] px-4 py-2.5 text-xs font-medium text-white hover:bg-[#1E2B3B]"
+                      >
+                        Add New Note
+                      </button>
+                    }
                   </div>
                 )}
               </>
             ) : (
-              /* =========================
-                 OPEN NOTE
-              ========================= */
               <article className="rounded-2xl border border-[#E8E3DD] bg-white p-5 shadow-sm sm:p-7">
                 {/* Note Header */}
                 <div className="mb-5 flex items-center justify-between border-b border-[#EEE9E3] pb-4">
                   <div className="flex items-center gap-2">
-                    {/* Edit */}
                     <button
                       type="button"
                       onClick={handleEditNote}
@@ -268,7 +446,6 @@ export default function Notes() {
                       <EditIcon />
                     </button>
 
-                    {/* Delete */}
                     <button
                       type="button"
                       onClick={handleDeleteNote}
@@ -279,7 +456,6 @@ export default function Notes() {
                     </button>
                   </div>
 
-                  {/* Close */}
                   <button
                     type="button"
                     onClick={handleCloseNote}
@@ -292,12 +468,25 @@ export default function Notes() {
 
                 {/* Note Meta */}
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-[#EEF4F8] px-2 py-1 text-[9px] font-medium text-[#6F91B5]">
-                    {selectedNote.courseCode}
+                  <span
+                    className="rounded px-2 py-1 text-[9px] font-medium"
+                    style={{
+                      backgroundColor: `${selectedNote.notebookColor || "#6F91B5"}20`,
+                      color: selectedNote.notebookColor || "#6F91B5",
+                    }}
+                  >
+                    {selectedNote.courseCode || "General Note"}
                   </span>
 
+                  {selectedNote.courseName && (
+                    <span className="text-[9px] text-[#697586]">
+                      {selectedNote.courseName}
+                    </span>
+                  )}
+
                   <span className="text-[9px] text-[#9AA3AD]">
-                    Last edited: {selectedNote.lastEdited}
+                    Last edited:{" "}
+                    {selectedNote.lastEdited || selectedNote.date || "—"}
                   </span>
                 </div>
 
@@ -307,20 +496,28 @@ export default function Notes() {
                 </h1>
 
                 {/* Description */}
-                <p className="mt-4 text-xs leading-relaxed text-[#697586] sm:text-sm">
+                <p className="mt-4 whitespace-pre-wrap text-xs leading-relaxed text-[#697586] sm:text-sm">
                   {selectedNote.description}
                 </p>
 
                 {/* Sections */}
                 <div className="mt-5 space-y-5">
-                  {selectedNote.sections.map((section, index) => (
+                  {(Array.isArray(selectedNote.sections)
+                    ? selectedNote.sections
+                    : []
+                  ).map((section, index) => (
                     <div key={index}>
-                      <h2 className="mb-2 text-sm font-semibold text-[#526274]">
-                        {section.title}
-                      </h2>
+                      {section.title && (
+                        <h2 className="mb-2 text-sm font-semibold text-[#526274]">
+                          {section.title}
+                        </h2>
+                      )}
 
                       <ul className="space-y-1.5">
-                        {section.points.map((point, pointIndex) => (
+                        {(Array.isArray(section.points)
+                          ? section.points
+                          : []
+                        ).map((point, pointIndex) => (
                           <li
                             key={pointIndex}
                             className="text-xs leading-relaxed text-[#697586]"
@@ -344,6 +541,13 @@ export default function Notes() {
           </section>
         </div>
       </main>
+
+      {/* Add / Edit Modal */}
+      <NoteModal
+        isOpen={showModal}
+        note={editingNote}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

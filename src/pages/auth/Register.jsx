@@ -30,7 +30,7 @@ export default function Register() {
         fullName: data.fullName.trim(),
         email: data.email.trim(),
         studentId: data.studentId.trim(),
-        university: data.university,
+        university: data.university.trim(),
         password: data.password,
       });
 
@@ -170,48 +170,24 @@ export default function Register() {
               University
             </label>
 
-            <div className="relative">
-              <select
-                id="university"
-                defaultValue=""
-                {...register("university")}
-                className={`h-[42px] w-full appearance-none rounded-[8px] border bg-[#FCFAF8] px-3 pr-10 text-[14px] text-[#344356] outline-none transition focus:ring-2 ${
-                  errors.university
-                    ? "border-red-400 focus:border-red-400 focus:ring-red-400/10"
-                    : "border-[#E1DDD8] focus:border-[#7095BA] focus:ring-[#7095BA]/10"
-                }`}
-              >
-                <option value="" disabled>
-                  Select your university
-                </option>
+            <input
+              id="university"
+              type="text"
+              list="university-suggestions"
+              autoComplete="off"
+              placeholder="Type or choose your university"
+              {...register("university")}
+              className={`h-[42px] w-full rounded-[8px] border bg-[#FCFAF8] px-3 text-[14px] text-[#344356] outline-none placeholder:text-[#91A4B3] transition focus:ring-2 ${
+                errors.university
+                  ? "border-red-400 focus:border-red-400 focus:ring-red-400/10"
+                  : "border-[#E1DDD8] focus:border-[#7095BA] focus:ring-[#7095BA]/10"
+              }`}
+            />
 
-                <option value="ivy">
-                  Ivy League University of Science & Arts
-                </option>
-
-                <option value="harvard">Harvard University</option>
-
-                <option value="stanford">Stanford University</option>
-
-                <option value="mit">
-                  Massachusetts Institute of Technology
-                </option>
-              </select>
-
-              <svg
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#526274"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </div>
+            <datalist id="university-suggestions">
+              <option value="October 6 University" />
+              <option value="Misr University for Science and Technology" />
+            </datalist>
 
             {errors.university && (
               <p className="mt-1 text-xs text-red-500">

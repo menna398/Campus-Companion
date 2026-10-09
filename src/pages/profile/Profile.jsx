@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
+import useCourseStore from "../../store/courseStore";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, updateUser, logout, deleteAccount } = useAuth();
+  const { courses, fetchCourses } = useCourseStore();
 
   const [activeTab, setActiveTab] = useState("personal");
   const [isEditing, setIsEditing] = useState(false);
@@ -18,7 +20,6 @@ export default function Profile() {
     university: "",
     college: "",
     gpa: "",
-    courses: [],
   });
 
   useEffect(() => {
@@ -30,10 +31,14 @@ export default function Profile() {
         university: user.university || "",
         college: user.college || "",
         gpa: user.gpa || "",
-        courses: user.courses || [],
       });
     }
   }, [user]);
+
+  // Courses come from the Courses page (single source of truth).
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,30 +46,6 @@ export default function Profile() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
-
-  const handleCourseChange = (index, value) => {
-    const updatedCourses = [...formData.courses];
-    updatedCourses[index] = value;
-
-    setFormData((prev) => ({
-      ...prev,
-      courses: updatedCourses,
-    }));
-  };
-
-  const addCourse = () => {
-    setFormData((prev) => ({
-      ...prev,
-      courses: [...prev.courses, ""],
-    }));
-  };
-
-  const removeCourse = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      courses: prev.courses.filter((_, i) => i !== index),
     }));
   };
 
@@ -89,9 +70,6 @@ export default function Profile() {
         university: formData.university.trim(),
         college: formData.college.trim(),
         gpa: String(formData.gpa).trim(),
-        courses: formData.courses
-          .map((course) => course.trim())
-          .filter(Boolean),
       });
 
       setIsEditing(false);
@@ -124,7 +102,6 @@ export default function Profile() {
         university: user.university || "",
         college: user.college || "",
         gpa: user.gpa || "",
-        courses: user.courses || [],
       });
     }
 
@@ -433,52 +410,34 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Courses */}
+              {/* Courses (read-only, managed from the Courses page) */}
               <div className="mt-7">
-                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-[#1E2A3A]">
-                      Courses
-                    </h3>
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-[#1E2A3A]">
+                    Courses
+                  </h3>
 
-                    <p className="mt-1 text-xs text-[#7A8490]">
-                      Add the courses you are currently taking.
-                    </p>
-                  </div>
-
-                  {isEditing && (
-                    <button
-                      onClick={addCourse}
-                      className="w-fit rounded-lg border border-[#D9D4CE] px-4 py-2 text-sm font-medium text-[#536275] transition hover:bg-[#F8F6F3]"
-                    >
-                      + Add Course
-                    </button>
-                  )}
+                  <p className="mt-1 text-xs text-[#7A8490]">
+                    Your current courses. Manage them from the Courses page.
+                  </p>
                 </div>
 
                 <div className="space-y-3">
-                  {formData.courses.length > 0 ? (
-                    formData.courses.map((course, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <input
-                          type="text"
-                          value={course}
-                          onChange={(e) =>
-                            handleCourseChange(index, e.target.value)
-                          }
-                          disabled={!isEditing}
-                          placeholder="Course name"
-                          className={inputClasses}
+                  {courses.length > 0 ? (
+                    courses.map((course) => (
+                      <div
+                        key={course.id || course._id || course.code}
+                        className="flex items-center gap-3 rounded-xl border border-[#E7E2DC] bg-[#FEFCFA] px-4 py-3"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                          style={{ backgroundColor: course.color || "#6F91B5" }}
                         />
 
-                        {isEditing && (
-                          <button
-                            onClick={() => removeCourse(index)}
-                            className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-[#9A5A52] transition hover:bg-[#FFF1EF]"
-                          >
-                            Remove
-                          </button>
-                        )}
+                        <span className="min-w-0 truncate text-sm text-[#1E2A3A]">
+                          {course.code ? `${course.code} — ` : ""}
+                          {course.title || course.name || "Untitled course"}
+                        </span>
                       </div>
                     ))
                   ) : (
@@ -486,15 +445,6 @@ export default function Profile() {
                       <p className="text-sm text-[#7A8490]">
                         No courses added yet.
                       </p>
-
-                      {isEditing && (
-                        <button
-                          onClick={addCourse}
-                          className="mt-3 text-sm font-medium text-[#536275] underline underline-offset-4"
-                        >
-                          Add your first course
-                        </button>
-                      )}
                     </div>
                   )}
                 </div>

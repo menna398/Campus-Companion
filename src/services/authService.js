@@ -101,7 +101,7 @@ export function logoutUser() {
   clearSession();
 }
 
-// PUT /api/profile  (assumed endpoint — see profileRoutes.js)
+// PATCH /api/profile
 export async function updateCurrentUser(updatedData) {
   const currentUser = getCurrentUser();
 
@@ -110,7 +110,7 @@ export async function updateCurrentUser(updatedData) {
   }
 
   try {
-    const response = await axios.put(`${API_URL}/profile`, updatedData, {
+    const response = await axios.patch(`${API_URL}/profile`, updatedData, {
       headers: getAuthHeaders(),
     });
 
@@ -131,7 +131,7 @@ export async function updateCurrentUser(updatedData) {
   }
 }
 
-// DELETE /api/profile  (assumed endpoint — see profileRoutes.js)
+// DELETE /api/profile
 export async function deleteCurrentUser() {
   try {
     await axios.delete(`${API_URL}/profile`, {

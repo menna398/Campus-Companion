@@ -16,7 +16,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -24,9 +24,15 @@ export default function Register() {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     try {
-      registerAccount(data);
+      await registerAccount({
+        fullName: data.fullName.trim(),
+        email: data.email.trim(),
+        studentId: data.studentId.trim(),
+        university: data.university,
+        password: data.password,
+      });
 
       toast.success(
         "Account created successfully! Welcome to Campus Companion.",
@@ -276,9 +282,10 @@ export default function Register() {
           {/* ================= CREATE ACCOUNT ================= */}
           <button
             type="submit"
-            className="h-[48px] w-full rounded-[9px] bg-[#1F2C3D] text-[15px] font-semibold text-white transition duration-200 hover:bg-[#29394D] active:scale-[0.99]"
+            disabled={isSubmitting}
+            className="h-[48px] w-full rounded-[9px] bg-[#1F2C3D] text-[15px] font-semibold text-white transition duration-200 hover:bg-[#29394D] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Account
+            {isSubmitting ? "Creating account..." : "Create Account"}
           </button>
         </form>
 

@@ -1,123 +1,145 @@
-import { mockUsers } from "../data/mockUsers";
+import axios from "axios";
 
-const USERS_KEY = "campus_companion_users";
-const CURRENT_USER_KEY = "campus_companion_current_user";
+const API_URL = "http://localhost:5000/api";
 
-export const getUsers = () => {
-  const storedUsers = localStorage.getItem(USERS_KEY);
+// "token" is the key every other service (events, notes, ...) already reads.
+const TOKEN_KEY = "token";
+const USER_KEY = "campus_companion_current_user";
 
-  if (storedUsers) {
-    return JSON.parse(storedUsers);
-  }
+// Old mock-auth key, removed so no fake users stay in the browser.
+const LEGACY_USERS_KEY = "campus_companion_users";
 
-  localStorage.setItem(USERS_KEY, JSON.stringify(mockUsers));
+function getErrorMessage(error, fallback) {
+  return error.response?.data?.message || error.message || fallback;
+}
 
-  return mockUsers;
-};
-
-export const registerUser = (userData) => {
-  const users = getUsers();
-
-  const existingUser = users.find(
-    (user) => user.email.toLowerCase() === userData.email.toLowerCase(),
-  );
-
-  if (existingUser) {
-    throw new Error("An account with this email already exists.");
-  }
-
-  const newUser = {
-    id: Date.now(),
-    fullName: userData.fullName,
-    email: userData.email,
-    studentId: userData.studentId,
-    university: userData.university,
-    password: userData.password,
+function getAuthHeaders() {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY)}`,
   };
+}
 
-  const updatedUsers = [...users, newUser];
+function saveSession({ user, token }) {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
 
-  localStorage.setItem(USERS_KEY, JSON.stringify(updatedUsers));
+function clearSession() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(LEGACY_USERS_KEY);
+}
 
-  return newUser;
-};
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
 
-export const loginUser = (email, password) => {
-  const users = getUsers();
+// The user is only considered logged in if BOTH the token and the user exist.
+export function getCurrentUser() {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const storedUser = localStorage.getItem(USER_KEY);
 
-  const user = users.find(
-    (user) =>
-      user.email.toLowerCase() === email.toLowerCase() &&
-      user.password === password,
-  );
+  if (!token || !storedUser) return null;
 
-  if (!user) {
-    throw new Error("Invalid email or password.");
-  }
-
-  const loggedInUser = {
-    id: user.id,
-    fullName: user.fullName,
-    email: user.email,
-    studentId: user.studentId,
-    university: user.university,
-  };
-
-  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(loggedInUser));
-
-  return loggedInUser;
-};
-
-export const getCurrentUser = () => {
-  const storedUser = localStorage.getItem(CURRENT_USER_KEY);
-
-  if (!storedUser) {
+  try {
+    return JSON.parse(storedUser);
+  } catch {
+    clearSession();
     return null;
   }
+}
 
-  return JSON.parse(storedUser);
-};
+// POST /api/auth/register
+export async function registerUser(userData) {
+  try {
+    const response = await axios.post(`${API_URL}/auth/register`, {
+      fullName: userData.fullName,
+      email: userData.email,
+      studentId: userData.studentId,
+      university: userData.university,
+      password: userData.password,
+    });
 
-export const logoutUser = () => {
-  localStorage.removeItem(CURRENT_USER_KEY);
-};
+    const { user, token } = response.data || {};
 
-export function updateCurrentUser(updatedData) {
+    if (!user || !token) {
+      throw new Error("Invalid response from the server.");
+    }
+
+    saveSession({ user, token });
+
+    return user;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Registration failed."));
+  }
+}
+
+// POST /api/auth/login
+export async function loginUser(email, password) {
+  try {
+    const response = await axios.post(`${API_URL}/auth/login`, {
+      email,
+      password,
+    });
+
+    const { user, token } = response.data || {};
+
+    if (!user || !token) {
+      throw new Error("Invalid response from the server.");
+    }
+
+    saveSession({ user, token });
+
+    return user;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Invalid email or password."));
+  }
+}
+
+export function logoutUser() {
+  clearSession();
+}
+
+// PUT /api/profile  (assumed endpoint — see profileRoutes.js)
+export async function updateCurrentUser(updatedData) {
   const currentUser = getCurrentUser();
 
   if (!currentUser) {
-    throw new Error("No logged-in user found");
+    throw new Error("No logged-in user found.");
   }
 
-  const updatedUser = {
-    ...currentUser,
-    ...updatedData,
-  };
+  try {
+    const response = await axios.put(`${API_URL}/profile`, updatedData, {
+      headers: getAuthHeaders(),
+    });
 
-  localStorage.setItem(
-    "campus_companion_current_user",
-    JSON.stringify(updatedUser),
-  );
+    const serverUser =
+      response.data?.user || response.data?.data || response.data || {};
 
-  const storedUsers = localStorage.getItem("campus_companion_users");
+    const updatedUser = {
+      ...currentUser,
+      ...updatedData,
+      ...serverUser,
+    };
 
-  if (storedUsers) {
-    const users = JSON.parse(storedUsers);
+    localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
 
-    const updatedUsers = users.map((user) =>
-      user.id === updatedUser.id
-        ? {
-            ...user,
-            ...updatedUser,
-          }
-        : user,
-    );
-
-    localStorage.setItem(
-      "campus_companion_users",
-      JSON.stringify(updatedUsers),
-    );
+    return updatedUser;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Failed to update profile."));
   }
+}
 
-  return updatedUser;
+// DELETE /api/profile  (assumed endpoint — see profileRoutes.js)
+export async function deleteCurrentUser() {
+  try {
+    await axios.delete(`${API_URL}/profile`, {
+      headers: getAuthHeaders(),
+    });
+
+    clearSession();
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Failed to delete account."));
+  }
 }

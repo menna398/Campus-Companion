@@ -16,14 +16,14 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     try {
-      login(data.email, data.password);
+      await login(data.email, data.password);
 
       toast.success("Login successful! Welcome back.");
 
@@ -181,9 +181,10 @@ export default function Login() {
           {/* ================= SIGN IN ================= */}
           <button
             type="submit"
-            className="mt-3 h-[58px] w-full rounded-[10px] bg-[#1F2C3D] text-[17px] font-semibold text-white transition duration-200 hover:bg-[#29394D] active:scale-[0.99]"
+            disabled={isSubmitting}
+            className="mt-3 h-[58px] w-full rounded-[10px] bg-[#1F2C3D] text-[17px] font-semibold text-white transition duration-200 hover:bg-[#29394D] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Sign In
+            {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
         </form>
 

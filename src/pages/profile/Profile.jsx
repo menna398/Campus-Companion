@@ -5,10 +5,11 @@ import Swal from "sweetalert2";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser, logout, deleteAccount } = useAuth();
 
   const [activeTab, setActiveTab] = useState("personal");
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -67,18 +68,51 @@ export default function Profile() {
     }));
   };
 
-  const handleSaveProfile = () => {
-    updateUser({
-      fullName: formData.fullName.trim(),
-      email: formData.email.trim(),
-      studentId: formData.studentId.trim(),
-      university: formData.university.trim(),
-      college: formData.college.trim(),
-      gpa: formData.gpa.trim(),
-      courses: formData.courses.map((course) => course.trim()).filter(Boolean),
-    });
+  const handleSaveProfile = async () => {
+    if (!formData.fullName.trim() || !formData.email.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Information",
+        text: "Full name and email are required.",
+        confirmButtonColor: "#1E2A3A",
+      });
+      return;
+    }
 
-    setIsEditing(false);
+    setIsSaving(true);
+
+    try {
+      await updateUser({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        studentId: formData.studentId.trim(),
+        university: formData.university.trim(),
+        college: formData.college.trim(),
+        gpa: String(formData.gpa).trim(),
+        courses: formData.courses
+          .map((course) => course.trim())
+          .filter(Boolean),
+      });
+
+      setIsEditing(false);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Profile Updated",
+        text: "Your profile has been updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: error.message || "Failed to update your profile.",
+        confirmButtonColor: "#1E2A3A",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -118,33 +152,26 @@ export default function Profile() {
 
     if (!result.isConfirmed) return;
 
-    const storedUsers = localStorage.getItem("campus_companion_users");
+    try {
+      await deleteAccount();
 
-    if (storedUsers) {
-      const users = JSON.parse(storedUsers);
+      await Swal.fire({
+        title: "Account Deleted",
+        text: "Your account has been deleted successfully.",
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#1E2A3A",
+      });
 
-      const updatedUsers = users.filter(
-        (storedUser) => storedUser.id !== user.id,
-      );
-
-      localStorage.setItem(
-        "campus_companion_users",
-        JSON.stringify(updatedUsers),
-      );
+      navigate("/login", { replace: true });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text: error.message || "Failed to delete your account.",
+        confirmButtonColor: "#1E2A3A",
+      });
     }
-
-    localStorage.removeItem("campus_companion_current_user");
-
-    await Swal.fire({
-      title: "Account Deleted",
-      text: "Your account has been deleted successfully.",
-      icon: "success",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#1E2A3A",
-    });
-
-    logout();
-    navigate("/login", { replace: true });
   };
 
   const getInitials = (name = "") => {
@@ -201,16 +228,18 @@ export default function Profile() {
                 <>
                   <button
                     onClick={handleCancel}
-                    className="rounded-xl border border-[#D9D4CE] bg-white px-5 py-2.5 text-sm font-medium text-[#536275] transition hover:bg-[#F8F6F3]"
+                    disabled={isSaving}
+                    className="rounded-xl border border-[#D9D4CE] bg-white px-5 py-2.5 text-sm font-medium text-[#536275] transition hover:bg-[#F8F6F3] disabled:opacity-50"
                   >
                     Cancel
                   </button>
 
                   <button
                     onClick={handleSaveProfile}
-                    className="rounded-xl bg-[#1E2A3A] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#2C3B4D]"
+                    disabled={isSaving}
+                    className="rounded-xl bg-[#1E2A3A] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#2C3B4D] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Save Changes
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </button>
                 </>
               )}

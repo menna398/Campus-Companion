@@ -4,7 +4,7 @@ import {
   getAssignments,
   getExams,
   getSchedule,
-} from "../services/dashboardservice";
+} from "../services/dashboardService.js";
 
 function getErrorMessage(error, fallback) {
   return error?.response?.data?.message || error?.message || fallback;

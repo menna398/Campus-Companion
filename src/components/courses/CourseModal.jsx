@@ -5,11 +5,6 @@ const emptyCourse = {
   title: "",
   professor: "",
   location: "",
-  schedule: {
-    day: "",
-    startTime: "",
-    endTime: "",
-  },
   credits: "",
   color: "#7094b8",
   professorImage: "",
@@ -217,28 +212,6 @@ export default function CourseModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-[9px] font-semibold text-[#596773]">
-                Day
-              </label>
-
-              <select
-                name="day"
-                value={formData.schedule.day}
-                onChange={handleScheduleChange}
-                className="w-full rounded-lg border border-[#e3dfda] bg-white px-3 py-2.5 text-[10px] text-[#273545] outline-none focus:border-[#7094b8] focus:ring-2 focus:ring-[#7094b8]/10"
-              >
-                <option value="">Select day</option>
-                <option value="Saturday">Saturday</option>
-                <option value="Sunday">Sunday</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-[9px] font-semibold text-[#596773]">
                 Credits
               </label>
 
@@ -248,38 +221,6 @@ export default function CourseModal({
                 value={formData.credits}
                 onChange={handleChange}
                 placeholder="e.g. 3"
-                className="w-full rounded-lg border border-[#e3dfda] bg-white px-3 py-2.5 text-[10px] text-[#273545] outline-none focus:border-[#7094b8] focus:ring-2 focus:ring-[#7094b8]/10"
-              />
-            </div>
-          </div>
-
-          {/* Start + End Time */}
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-[9px] font-semibold text-[#596773]">
-                Start Time
-              </label>
-
-              <input
-                type="time"
-                name="startTime"
-                value={formData.schedule.startTime}
-                onChange={handleScheduleChange}
-                className="w-full rounded-lg border border-[#e3dfda] bg-white px-3 py-2.5 text-[10px] text-[#273545] outline-none focus:border-[#7094b8] focus:ring-2 focus:ring-[#7094b8]/10"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-[9px] font-semibold text-[#596773]">
-                End Time
-              </label>
-
-              <input
-                type="time"
-                name="endTime"
-                value={formData.schedule.endTime}
-                onChange={handleScheduleChange}
                 className="w-full rounded-lg border border-[#e3dfda] bg-white px-3 py-2.5 text-[10px] text-[#273545] outline-none focus:border-[#7094b8] focus:ring-2 focus:ring-[#7094b8]/10"
               />
             </div>
